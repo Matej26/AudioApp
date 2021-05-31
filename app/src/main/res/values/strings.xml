@@ -1,0 +1,5 @@
+<resources>
+    <string name="app_name">Text And Speech</string>
+    <string name="text">Назовите страну</string>
+    <string name="message"> </string>
+</resources>
