@@ -14,9 +14,10 @@ import java.util.HashSet;
 import java.util.Objects;
 
 class Countries {
-    public HashSet<String> set;
+    HashSet<String> set;
+    HashSet<String> alreadyUsed = new HashSet<>();
 
-    @RequiresApi(api = Build.VERSION_CODES.N)
+    @RequiresApi(api = Build.VERSION_CODES.O)
     Countries(Activity main) {
         try {
             JSONObject obj = new JSONObject(Objects.requireNonNull(loadJSONFromAsset(main)));
@@ -49,7 +50,7 @@ class Countries {
         return json;
     }
 
-    @RequiresApi(api = Build.VERSION_CODES.N)
+    @RequiresApi(api = Build.VERSION_CODES.O)
     Object[] getCountriesStartWith(String prefix) {
         return this.set.stream().filter(data -> data.startsWith(prefix)).toArray();
     }

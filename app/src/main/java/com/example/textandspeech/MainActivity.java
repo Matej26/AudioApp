@@ -43,15 +43,16 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
+        if(ContextCompat.checkSelfPermission(this, Manifest.permission.RECORD_AUDIO) != PackageManager.PERMISSION_GRANTED){
+            checkPermission();
+        }
+
         inputText = findViewById(R.id.spokenText);
         message = findViewById(R.id.textMessage);
         micButton = findViewById(R.id.micButton);
         speechRecognizer = SpeechRecognizer.createSpeechRecognizer(this);
         countries = new Countries(this);
 
-        if(ContextCompat.checkSelfPermission(this, Manifest.permission.RECORD_AUDIO) != PackageManager.PERMISSION_GRANTED){
-            checkPermission();
-        }
         Intent speechRecognizerIntent = new Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH);
         speechRecognizerIntent.putExtra(RecognizerIntent.EXTRA_LANGUAGE_MODEL, RecognizerIntent.LANGUAGE_MODEL_FREE_FORM);
         speechRecognizerIntent.putExtra(RecognizerIntent.EXTRA_LANGUAGE, Locale.getDefault());
@@ -99,7 +100,7 @@ public class MainActivity extends AppCompatActivity {
 
             }
 
-            @RequiresApi(api = Build.VERSION_CODES.N)
+            @RequiresApi(api = Build.VERSION_CODES.O)
             @Override
             public void onResults(Bundle results) {
                 micButton.setBackgroundResource(R.drawable.mic);
@@ -109,8 +110,10 @@ public class MainActivity extends AppCompatActivity {
                 str = str.toLowerCase();
                 if (str.charAt(0) != firstLetter && firstLetter != '`') {
                     message.setText("Не пытайтесь меня обмануть!");
+                    textToSpeech.speak("Не пытайтесь меня обмануть!", TextToSpeech.QUEUE_FLUSH, null, "response");
                 } else {
                     if (countries.set.remove(str)) {
+                        countries.alreadyUsed.add(str);
                         char last = str.charAt(str.length() - 1);
                         if (last == 'ы' || last == 'ь') {
                             last = str.charAt(str.length() - 2);
@@ -118,6 +121,8 @@ public class MainActivity extends AppCompatActivity {
                         candidates = countries.getCountriesStartWith(String.valueOf(last));
                         response = new Answerer().getAnswer(candidates, countries);
                         firstLetter = response.charAt(response.length() - 1);
+                    } else if (countries.alreadyUsed.contains(str)) {
+                        response = "Такая страна уже была!";
                     } else {
                         response = "Такой страны нет!";
                     }
@@ -128,7 +133,7 @@ public class MainActivity extends AppCompatActivity {
 
             @Override
             public void onPartialResults(Bundle partialResults) {
-                System.out.println("partial results");
+
             }
 
             @Override
@@ -154,7 +159,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void checkPermission() {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             ActivityCompat.requestPermissions(this,new String[]{Manifest.permission.RECORD_AUDIO},RecordAudioRequestCode);
         }
     }
